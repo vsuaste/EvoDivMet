@@ -45,7 +45,7 @@ GetOptions(
         'bitscore=i'=>\(my $bitscore=0),  		## Revisar el archivo .BLAST.pre para tener idea de este parámetro.
         'cluster_radio=i'=>\(my $cluster_radio=10), 	#number of genes in the neighborhood to be analized
         'e_cluster=f'=>\(my $e_cluster=0.001), #Query search e-value for homologies from reference cluster, values above this will be colored
-        'e_core=f'=>\(my $e_core=0.001) ,  
+        'e_core=f'=>\(my $e_core=0.001) ,
         'list=s'=>\my $lista , ##Wich genomes would you process in case you might, otherwise left empty for whole DB search
         'rescale=i'=>\(my $rescale = 85000) ,
         'num=i'=>\my $num ,  #the number of genomes to be analized in case you used the option $LIST, comment if $LIST is empty
@@ -88,24 +88,24 @@ my $NUM = `wc -l < $rast_ids`;
 		system("1_Context_text.pl -q $queries -s $special_org -e_value $e_value -b $bitscore -c $cluster_radio -e_cluster $e_cluster -r $rescale -l $lista -n $num -rast_ids $rast_ids -type  prots -makedb -antismash $antismash");
                 }
         else {
-                print "\nSearching on clusters in reduced list: $lista\n";        
+                print "\nSearching on clusters in reduced list: $lista\n";
 		system("1_Context_text.pl -q $queries -s $special_org -e_value $e_value -b $bitscore -c $cluster_radio -e_cluster $e_cluster -r $rescale -l $lista -n $num -rast_ids $rast_ids -type prots -makedb -antismash $antismash");
                }
 	print "Sequences search finished\n\n";
 #___________________ end Query blast ________________________________________________________________________
 
 print "Analising cluster with hits according to the query sequence\n\n";
-	my $new_data=`ReadingInputs.pl $outname`; 
+	my $new_data=`ReadingInputs.pl $outname`;
 	my @st=split(/\t/,$new_data);
 ($num,$lista)=split(/\t/,$new_data);
-#$num=$st[0]; 
+#$num=$st[0];
 #$lista=$st[1];
 	if ($verbose) {print "\n$num clusters found. Ids: $lista\n\n";}
 	my $NumClust= `ls $outname/*.input2|wc -l`;
 	chomp $NumClust;
 	#$NumClust=~s/\r//;
-	print "There are $NumClust similar clusters\n"; 
-	$report=$report. "\n\nThere are $NumClust similar clusters\n"; 
+	print "There are $NumClust similar clusters\n";
+	$report=$report. "\n\nThere are $NumClust similar clusters\n";
 #__________________________________________________________________________________________________________
 print "Creating query hits tree, without considering the core-clusters\n";
 	`cat $outname/*.input2> $outname/PrincipalHits`;
@@ -202,9 +202,19 @@ if ($boolCore>1){
 
 #_____________________________________________________________________________________________
 
+#make clusters of all genes in the clusters (including the ones that aren't part of the core)
+system("makeClustersOfClusters.pl $outname/CoreCORASON.blast $outname");
+
 print "Now SVG file will be generated with inputs: $INPUTS\n\n";
 #	print "3_Draw.pl $rescale $INPUTS $outname";
-	system("3_Draw.pl $rescale $INPUTS $outname");
+system("3_Draw.pl $rescale $INPUTS $outname 0");
+`mv $outname/Contextos.svg $outname/$outname\.svg`;
+
+system("3_Draw.pl $rescale $INPUTS $outname 1");
+`mv $outname/Contextos.svg $outname/$outname\_1\.svg`;
+
+system("3_Draw.pl $rescale $INPUTS $outname 2");
+`mv $outname/Contextos.svg $outname/$outname\_2\.svg`;
 
 print "SVG  file generated\n\n";
 `mv $outname/Contextos.svg $outname/$outname\.svg`;
@@ -265,8 +275,8 @@ sub specialCluster{
 	foreach my $cluster (@CLUSTERS){
 		chomp $cluster;
 		#print "I will open #$cluster#\n";
-		open (FILE, $cluster) or die "Couldn't open $outname/$cluster\n"; 
-		my $firstLine = <FILE>; 
+		open (FILE, $cluster) or die "Couldn't open $outname/$cluster\n";
+		my $firstLine = <FILE>;
 		chomp $firstLine;
 		close FILE;
 		#print "Primera linea $firstLine\n";

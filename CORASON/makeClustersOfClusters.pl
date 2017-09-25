@@ -170,7 +170,7 @@ sub makeClusterFunction{
       my $temp_percentaje = ($temp_count*100.0)/$counter;
       print OUT_FILE  $col, "\t",$temp_count, "\t" , $temp_percentaje, "\t";
       foreach my $func (keys %{ $hash_color_funtions{$col} }) {
-          print OUT_FILE "$func, $hash_color_funtions{$col}{$func}, ";
+          print OUT_FILE "$func \t $hash_color_funtions{$col}{$func} \t ";
       }
       print OUT_FILE "\n";
   }

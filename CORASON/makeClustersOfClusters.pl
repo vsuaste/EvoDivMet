@@ -10,10 +10,12 @@ sub readColorsCluster;
 
 my $blast_file_name = $ARGV[0];
 my $out_name = $ARGV[1];
-my $e_value = $ARGV[2];
+my $special_org = $ARGV[2];
+my $e_value = $ARGV[3];
 
 my $ref_hash_id_color = clusterizeAndAssingColor($blast_file_name);
 printClusters($out_name, $ref_hash_id_color);
+makeClusterFunction($out_name."/clusters.cl",  $special_org);
 
 #my $clusters_file = $ARGV[0];
 
@@ -117,4 +119,60 @@ sub readColorsCluster{
   }
   close COLORS_FILE;
   return \%hash_color;
+}
+
+sub makeClusterFunction{
+
+  my $input_file_name = shift;
+  my $special_org = shift;
+  my $org_number;
+  my $color;
+  my $function;
+  my $counter = 0;
+  my @columns;
+  my %hash_color_funtions;
+  my %hash_color_special_org;
+
+
+  open (COLORS_FILE, "$input_file_name") or die "Couldn't open $input_file_name $! \n";
+  while(my $line = <COLORS_FILE>)
+  {
+    $counter+=1;
+    chomp $line;
+    @columns = split("\t",$line);
+    $columns[0] =~ /\|(\d+)_\d+/;
+    $org_number = $1;
+    $color = $columns[1];
+    $function = $columns[2];
+
+
+      if(! exists $hash_color_funtions{$color} or !exists $hash_color_funtions{$color}{$function})
+      {
+          $hash_color_funtions{$color}{$function} = 1;
+      }
+      else
+      {
+        $hash_color_funtions{$color}{$function} += 1;
+      }
+  }
+  close COLORS_FILE;
+
+  #WRITE REPORT FILE
+  #color \t recurrenceColor \t function1,recurrenceFuncion1, function2, recurrenceFunction2, ....
+  open OUT_FILE, ">", "$out_name/report_clusters.cl" or die "Couldn't create $out_name/report_clusters.cl $! \n";
+  #open OUT_FILE, ">", "report_clusters.cl" or die "Couldn't create report_clusters.cl $! \n";
+
+  foreach my $col (sort keys %hash_color_funtions) {
+      my $temp_count = 0; # color recurrence
+      foreach my $func (keys %{ $hash_color_funtions{$col} }) {
+          $temp_count += $hash_color_funtions{$col}{$func};
+      }
+      my $temp_percentaje = ($temp_count*100.0)/$counter;
+      print OUT_FILE  $col, "\t",$temp_count, "\t" , $temp_percentaje, "\t";
+      foreach my $func (keys %{ $hash_color_funtions{$col} }) {
+          print OUT_FILE "$func, $hash_color_funtions{$col}{$func}, ";
+      }
+      print OUT_FILE "\n";
+  }
+  close OUT_FILE;
 }

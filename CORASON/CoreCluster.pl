@@ -203,7 +203,7 @@ if ($boolCore>1){
 #_____________________________________________________________________________________________
 
 #make clusters of all genes in the clusters (including the ones that aren't part of the core)
-system("makeClustersOfClusters.pl $outname/CoreCORASON.blast $outname");
+system("makeClustersOfClusters.pl $outname/CoreCORASON.blast $outname $special_org");
 
 print "Now SVG file will be generated with inputs: $INPUTS\n\n";
 #	print "3_Draw.pl $rescale $INPUTS $outname";

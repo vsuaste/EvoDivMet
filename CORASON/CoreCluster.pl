@@ -217,7 +217,7 @@ system("3_Draw.pl $rescale $INPUTS $outname 2");
 `mv $outname/Contextos.svg $outname/$outname\_2\.svg`;
 
 print "SVG  file generated\n\n";
-`mv $outname/Contextos.svg $outname/$outname\.svg`;
+#`mv $outname/Contextos.svg $outname/$outname\.svg`;
 
 open (REPORTE, ">$outname/$outname\_Report") or die "Couldn't open reportfile $!";
 print REPORTE $report;

@@ -16,7 +16,7 @@ my $e_value = $ARGV[3];
 my $ref_hash_id_color = clusterizeAndAssingColor($blast_file_name);
 printClusters($out_name, $ref_hash_id_color);
 makeClusterFunction($out_name."/clusters.cl",  $special_org);
-
+print "**********SPECIAL ORG: $special_org \n";
 #my $clusters_file = $ARGV[0];
 
 #my $ref_hash = readColorsCluster($clusters_file);
@@ -129,10 +129,12 @@ sub makeClusterFunction{
   my $color;
   my $function;
   my $counter = 0;
+  my $marker = "special_org";
   my @columns;
   my %hash_color_funtions;
   my %hash_color_special_org;
 
+  print "**********SPECIAL ORG: $special_org \n";
 
   open (COLORS_FILE, "$input_file_name") or die "Couldn't open $input_file_name $! \n";
   while(my $line = <COLORS_FILE>)
@@ -145,7 +147,6 @@ sub makeClusterFunction{
     $color = $columns[1];
     $function = $columns[2];
 
-
       if(! exists $hash_color_funtions{$color} or !exists $hash_color_funtions{$color}{$function})
       {
           $hash_color_funtions{$color}{$function} = 1;
@@ -153,6 +154,12 @@ sub makeClusterFunction{
       else
       {
         $hash_color_funtions{$color}{$function} += 1;
+      }
+
+      if($org_number == $special_org)
+      {
+          #mark if the special_org is part of this class ($color) and asign the function of the spercial org
+          $hash_color_funtions{$color}{$marker} = $function;
       }
   }
   close COLORS_FILE;
@@ -165,11 +172,22 @@ sub makeClusterFunction{
   foreach my $col (sort keys %hash_color_funtions) {
       my $temp_count = 0; # color recurrence
       foreach my $func (keys %{ $hash_color_funtions{$col} }) {
-          $temp_count += $hash_color_funtions{$col}{$func};
+          if($func ne $marker)
+          {
+            $temp_count += $hash_color_funtions{$col}{$func};
+          }
       }
       my $temp_percentaje = ($temp_count*100.0)/$counter;
       print OUT_FILE  $col, "\t",$temp_count, "\t" , $temp_percentaje, "\t";
-      foreach my $func (keys %{ $hash_color_funtions{$col} }) {
+      if(exists $hash_color_funtions{$col}{$marker})
+      {
+        my $temp_func = $hash_color_funtions{$col}{$marker};
+        print OUT_FILE " * $temp_func \t $hash_color_funtions{$col}{$temp_func} \t ";
+        delete($hash_color_funtions{$col}{$marker});
+        delete($hash_color_funtions{$col}{$temp_func});
+      }
+
+      foreach my $func (reverse sort { $hash_color_funtions{$col}{$a} <=> $hash_color_funtions{$col}{$b} } keys %{$hash_color_funtions{$col}}) {
           print OUT_FILE "$func \t $hash_color_funtions{$col}{$func} \t ";
       }
       print OUT_FILE "\n";

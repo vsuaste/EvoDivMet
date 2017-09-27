@@ -32,7 +32,7 @@ my $grueso=16.0;		## Grosor de las flechas
 my %ColorNames=Fill_Colors();
 my $cutleft=0;
 my $verbose;
-my $clusters_file ="$outname/clusters.cl";	#File with clusters by color 
+my $clusters_file ="$outname/clusters.cl";	#File with clusters by color
 #################################################################################
 #################################################################################
 
@@ -256,7 +256,7 @@ sub ReadContexts{  ###Here we read all the .input files
 	#print "Color case = $color_case\n";
 	if($color_case!=0)
 	{
-		system("makeClustersOfClusters.pl $outname/CoreCORASON.blast $outname");
+		#system("makeClustersOfClusters.pl $outname/CoreCORASON.blast $outname");
 		$ref_hash_colors = readColorsCluster($clusters_file);
 		#print "Printing colors....... \n";
 		#foreach my $job_id(keys %$ref_hash_colors)
